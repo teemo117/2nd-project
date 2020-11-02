@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>강사로그인</title>
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript">
+	$(function() {
+		$('#login').click(function() {
+			id = $('#id').val()
+			pw = $('#pw').val()
+
+			if (id.length == 0) {
+				$('.idcheck').html("<font color=red>아이디를 입력해주세요</font>")
+			} else {
+				$('.idcheck').html("<font color=blue></font>")
+				if (pw.length == 0) {
+					$('.pwcheck').html("<font color=red>비밀번호를 입력해주세요</font>")
+				} else {
+					$.ajax({
+						url : "teacherLogin.jsp",
+						data : {
+							id : id,
+							pw : pw
+						},
+						success : function(check) {
+							if (check == "로그인 성공!!") {
+								alert(check)
+								location.href = "Main.jsp?id=" + id
+							} else {
+								alert(check)
+							}
+						}
+					})
+				}
+			}
+
+		})
+	})
+</script>
+</head>
+<body>
+	<div class="teacherLogin_page">
+		<h3>강사 로그인</h3>
+		<div class="info2_title">
+			<br> 아이디 <br>
+		</div> <input type="text" name="id" id="id" class="form-control"><br>
+		<div class="idcheck"></div>
+		<div class="info2_title">
+			<br> 비밀번호 <br>
+		</div> <input type="password" name="pw" id="pw" class="form-control"><br>
+		<div class="pwcheck"></div>
+		<br> &nbsp;<a href="uOrTJoin.html"><button type="submit" class="btn btn-secondary">회원가입</button></a>
+		&nbsp;&nbsp; &nbsp;
+		<button type="submit" id="login" class="btn btn-primary">로그인</button>
+	</div>
+</body>
+</html>

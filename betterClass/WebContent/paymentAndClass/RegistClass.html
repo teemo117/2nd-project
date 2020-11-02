@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+<meta charset="UTF-8">
+<title>Better Class - 더 나은 내일</title>
+<!--달력을 위한 js(cdn)-->
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script type="text/javascript">
+	var authCode; //인증코드
+	var authCheck = false; //인증코드 체크 여부를 위한 변수
+	
+	//달력 한글화를 위한 코드
+	( function( factory ) {
+		if ( typeof define === "function" && define.amd ) {
+
+			// AMD. Register as an anonymous module.
+			define( [ "../widgets/datepicker" ], factory );
+		} else {
+
+			// Browser globals
+			factory( jQuery.datepicker );
+		}
+	}( function( datepicker ) {
+
+	//달력 영문 => 한글
+	datepicker.regional.ko = {
+		closeText: "닫기",
+		prevText: "이전달",
+		nextText: "다음달",
+		currentText: "오늘",
+		monthNames: [ "1월","2월","3월","4월","5월","6월",
+		"7월","8월","9월","10월","11월","12월" ],
+		monthNamesShort: [ "1월","2월","3월","4월","5월","6월",
+		"7월","8월","9월","10월","11월","12월" ],
+		dayNames: [ "일요일","월요일","화요일","수요일","목요일","금요일","토요일" ],
+		dayNamesShort: [ "일","월","화","수","목","금","토" ],
+		dayNamesMin: [ "일","월","화","수","목","금","토" ],
+		weekHeader: "주",
+		dateFormat: "yy-mm-dd-D", //데이터포멧변경가능
+		firstDay: 0,
+		isRTL: false,
+		showMonthAfterYear: true,
+		yearSuffix: "년" };
+	datepicker.setDefaults( datepicker.regional.ko );
+
+	return datepicker.regional.ko;
+
+	} ) );//factory 
+	
+	$(function() {
+		//자격증 다중 업로드를 위한 자바스크립트
+		var fileTarget = $('#teacher_Crt');//파일 업로드 클릭시
+		fileTarget.on('change', function() {//fileTarget의 값이 변했을때 함수 실행
+		var filenames= new Array();//파일들 저장할 배열
+			var files = document.getElementById("teacher_Crt").files; //파일선택시 파일들 변수에 저장
+			for (var i = 0; i < files.length; i++) {
+				filenames[i] = files[i].name; //선택된 파일이름 배열에 저장
+				$(this).siblings('#teacher_CrtText').val(filenames); //텍스트 박스에 파일이름들 넣기
+			}//for
+		})//on.change
+		
+		//인증코드 전송
+		$('#authNumSend').click(function() {
+			$.ajax({
+				url : "idSendMail.jsp", //메일전송jsp
+				data : {
+					email_user : $('#teacher_Email').val() // 강사이메일
+				},
+				success : function(code1) {
+					alert("이메일을 확인하세요") //인증코드 전송 시
+					authCode = code1.trim(); //공백제거,전역변수에 랜덤코드저장
+				}
+			})
+		})//authNumSend
+		
+		//인증코드비교함수
+		$('#authNumCheck').click(function() {
+			authNumCheck = $('#teacher_EmailC').val() //유저가 입력한 코드 저장
+			if (authCode == authNumCheck) {//인증코드와 유저가 입력한 코드가 맞다면
+				alert("확인되었습니다.")
+				authCheck = true; //인증체크 true전환
+			} else { //코드 서로 불일치시
+				alert("인증 코드가 같지 않습니다.")
+			}
+		})//authNumCheck
+		
+		$('#button_finish').click(function() {
+			if(authCheck!=true){ //인증번호 체크를 하지않았으면 다음단계진행x
+				alert("인증번호를 체크해주세요")		
+			}else{
+				//빈칸이 하나라도 존재한다면
+				if($('#class_imgText').val().length == 0 || $('#teacher_cont_intro_box1').val().length ==0 ||
+				    $('#class_Name').val().length ==0 || $('#datepicker').val().length ==0 ||
+					$('#teacher_cont_content_box1').val().length == 0 ||
+					$('#class_Price').val().length == 0 ||  $('#teacher_CrtText').val().length == 0 ||
+					$('#class_address').val() == 0){
+												alert("빈칸을 확인하세요")
+				}else{
+					if($('#time_Select1').val() >= $('#time_Select2').val()){ //시작시간이 종료시간보다 크다면
+						alert('일정 시간을 확인해주세요')
+					}else{
+					//DB date,time 타입을 맞추기 위해 데이터 슬라이싱
+					//시간타입 변환 ex 06(time_Select1) > 06:00:00 변환
+					timeChange = $('#time_Select1').val()
+					dateChange = $('#datepicker').val().substring(0,10) //날짜 slicing 2020-10-02
+					dayChange = $('#datepicker').val().substring(11,12) //요일 slicing
+					console.log(dateChange)
+				     $.ajax({
+						url : "RegistClass.jsp", // 데이터 전달 할 주소
+						data :{
+							tCrt : $('#teacher_CrtText').val(),
+							cImg : $('#class_imgText').val(),
+							cInfo : $('#teacher_cont_intro_box1').val(),
+							cType :  $('#kind_Select1').val(),
+							cAddress : $('#class_address').val()+" "+$('#class_detailAddress').val()+" "+ $('#class_extraAddress').val(),
+							cTitle : $('#class_Name').val(),
+							cCurriculum : $('#teacher_cont_content_box1').val(),
+							cLimit : $('#limitSelect1').val(),
+							cPrice : $('#class_Price').val(),
+							cDate : dateChange,
+							cTime : timeChange,
+							cDay : dayChange
+							
+						},
+						success : function(check) {
+							if(check=="완료"){
+								alert("등록완료")
+								location.href = "Main.jsp"
+							}else{
+								alert(check)
+							}
+							
+						}//success
+						
+					})//.ajax 
+					}
+				}
+			}
+		})//btn_finish.click
+	
+    $("#datepicker").datepicker({
+    	changeYear: true, 
+       
+    }) //달력사용을위한 jquery 
+
+	});
+ 
+</script>
+<script
+	src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script type="text/javascript">
+	//주소찾기 api
+	function searchAddress() {
+		new daum.Postcode(
+				{
+					oncomplete : function(data) {
+						// 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+						// 각 주소의 노출 규칙에 따라 주소를 조합한다.
+						// 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+						var addr = ''; // 주소 변수
+						var extraAddr = ''; // 참고항목 변수
+
+						//사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+						if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+							addr = data.roadAddress;
+						} else { // 사용자가 지번 주소를 선택했을 경우(J)
+							addr = data.jibunAddress;
+						}
+
+						// 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+						if (data.userSelectedType === 'R') {
+							// 법정동명이 있을 경우 추가한다. (법정리는 제외)
+							// 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+							if (data.bname !== ''
+									&& /[동|로|가]$/g.test(data.bname)) {
+								extraAddr += data.bname;
+							}
+							// 건물명이 있고, 공동주택일 경우 추가한다.
+							if (data.buildingName !== ''
+									&& data.apartment === 'Y') {
+								extraAddr += (extraAddr !== '' ? ', '
+										+ data.buildingName : data.buildingName);
+							}
+							// 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+							if (extraAddr !== '') {
+								extraAddr = ' (' + extraAddr + ')';
+							}
+							// 조합된 참고항목을 해당 필드에 넣는다.
+							document.getElementById("class_extraAddress").value = extraAddr;
+
+						} else {
+							document.getElementById("class_extraAddress").value = '';
+						}
+
+						// 우편번호와 주소 정보를 해당 필드에 넣는다.
+						document.getElementById("class_address").value = addr;
+						// 커서를 상세주소 필드로 이동한다.
+						document.getElementById("class_detailAddress").focus();
+					}
+				}).open();
+	}
+</script>
+</head>
+<body>
+<jsp:include page="Header.jsp"></jsp:include>
+	<div class="teacher_cont">
+		<div class="box1">
+			<div class="teacher_cont_title">
+				<h3>강사등록</h3>
+				<hr>
+			</div>
+			<div class="info1">
+				<span class="pink">*</span> 필수
+				<hr>
+			</div>
+			<div class="info2">
+				<div class=info2_title>
+					강사이메일인증 <b class="pink"> *</b>
+				</div>
+				<div class=info2_box>
+					<input type="text" class="form-control" id="teacher_Email"
+						name="t_Email" aria-describedby="emailHelp" placeholder="email"
+						size="8" maxlength="30">
+					<button type="button" class="btn btn-secondary" id="authNumSend">전송</button>
+					<input type="text" class="form-control" id="teacher_EmailC"
+						aria-describedby="emailHelp" placeholder="Number" size="8"
+						maxlength="6">
+					<button type="button" class="btn btn-secondary" id="authNumCheck">확인</button>
+				</div>
+			</div>
+			<div class="info3" name=form1>
+				<div class="info3_teacherCrt_title">자격증(토익,경력증명서)<b class="pink"> *</b>
+				</div>
+				<label for="ex_file"> <input type="text"
+					class="form-control" id="teacher_CrtText" name="teacher_CrtText"
+					maxlength="50" disabled="disabled"> <input type="file"
+					multiple="multiple" name="teacher_Crt" id="teacher_Crt"
+					accept=".jpg, .jpeg, .png, .pdf">
+				</label>
+
+			</div>
+			<div class="box2">
+				<hr>
+				<div class="teacher_cont_imgTitle">
+					사진등록<b class="pink"> *</b>
+				</div>
+				<div class="teacher_cont_img">
+					<label for="ex_file"> <input type="text"
+						class="form-control" id="class_imgText" name="class_img_text"
+						disabled="disabled"> <input type="file" name="class_img"
+						onchange="javascript:document.getElementById('class_imgText').value = this.value.split('/').pop().split('\\').pop()"
+						accept=".jpg, .jpeg, .png, .pdf">
+					</label>
+				</div>
+				<div class="teacher_cont_intro">
+					클래스소개<b class="pink"> *</b>
+				</div>
+				<div class="teacher_cont_intro_box">
+					<textarea id="teacher_cont_intro_box1" name="class_intr" rows="30"
+						cols="100" placeholder="예)반갑습니다."></textarea>
+				</div>
+				<div class=teacher_cont_kind_title>
+					분야<b class="pink"> *</b>
+				</div>
+				<div class="teacher_cont_kind">
+					<select class="form-control" id="kind_Select1" name="class_type">
+						<option>요리</option>
+						<option>와인</option>
+						<option>공예</option>
+						<option>액티비티</option>
+					</select>
+				</div>
+				<div class="teacher_cont_addr">
+					<div class="col form-group"></div>
+					클래스 주소<b class="pink"> *</b>
+				</div>
+				<div class="teacher_cont_addr">
+					<input type="button" onclick="searchAddress()" value="주소 찾기"
+						class="btn btn-primary" readonly="readonly"><br> 
+					<input type="text" name="class_address" id="class_address"
+						placeholder="주소" class="form-control" readonly="readonly"><br>
+					<input type="text" name="class_detailAddress"
+						id="class_detailAddress" placeholder="상세주소" class="form-control">
+					<input type="text" name="class_extraAddress"
+						id="class_extraAddress" placeholder="참고항목" class="form-control">
+				</div>
+				<div class="teacher_cont_addr_box"></div>
+				<div class="teacher_cont_name">
+					클래스이름<b class="pink"> *</b>
+				</div>
+				<div class="teacher_cont_name_box">
+					<input type="text" class="form-control" id="class_Name"
+						aria-describedby="emailHelp" placeholder="강좌이름" name="class_Name">
+				</div>
+				<div class="teacher_cont_content">커리큘럼<b class="pink"> *</b></div>
+				<div class="teacher_cont_content_box">
+					<textarea id="teacher_cont_content_box1" name="class_Curri"
+						rows="30" cols="100" placeholder="예)1.알고리즘 : ~~"></textarea>
+				</div>
+				<div class="teacher_cont_limit">
+					인원수제한<b class="pink"> *</b>
+				</div>
+				<div class="teacher_cont_limit_box">
+					<select class="form-control" id="limitSelect1" name="class_limit">
+						<option>1</option>
+						<option>2</option>
+						<option>3</option>
+						<option>4</option>
+						<option>5</option>
+						<option>6</option>
+						<option>7</option>
+						<option>8</option>
+						<option>9</option>
+						<option>10</option>
+					</select>
+				</div>
+				<div class="teacher_cont_date">
+					일정<b class="pink"> *</b>
+					<input type="button" class="btn btn-primary" value="달력" onclick="$('#datepicker').datepicker('show');" />
+				</div>
+				<div class="teacher_cont_date_box">
+				날짜 : <input type="text" id="datepicker" disabled="disabled">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <label
+						for="exampleSelect1">시작</label> <select
+						class="form-control1" id="time_Select1">
+						<option>06</option>
+						<option>07</option>
+						<option>08</option>
+						<option>09</option>
+						<option>10</option>
+						<option>11</option>
+						<option>12</option>
+						<option>13</option>
+						<option>14</option>
+						<option>15</option>
+						<option>16</option>
+						<option>17</option>
+						<option>18</option>
+						<option>19</option>
+						<option>20</option>
+						<option>21</option>
+						<option>22</option>
+						<option>23</option>
+					</select>&nbsp;&nbsp;시&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					~&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					종료</label> <select
+						class="form-control1" id="time_Select2">
+						<option>06</option>
+						<option>07</option>
+						<option>08</option>
+						<option>09</option>
+						<option>10</option>
+						<option>11</option>
+						<option>12</option>
+						<option>13</option>
+						<option>14</option>
+						<option>15</option>
+						<option>16</option>
+						<option>17</option>
+						<option>18</option>
+						<option>19</option>
+						<option>20</option>
+						<option>21</option>
+						<option>22</option>
+						<option>24</option>
+					</select>&nbsp;&nbsp;&nbsp;시
+				</div>
+				<div class="teacher_cont_price">
+					가격(시간당)<b class="pink"> *</b>
+				</div>
+				<div class="teacher_cont_price_box">
+					<input type="text" class="form-control" id="class_Price"
+						aria-describedby="emailHelp" placeholder="5000" name="class_Price">
+					<hr>
+				</div>
+				<div class="button_box">
+					<button type="submit" class="btn btn-primary btn-lg"
+						id="button_finish">완료</button>
+					<button type="button" class="btn btn-primary btn-lg"
+						id="button_cancel">취소</button>
+				</div>
+				<jsp:include page="Footer.jsp"></jsp:include>
+</body>
+</head>
+</html>

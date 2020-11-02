@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>강사회원가입</title>
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript">
+	$(function(){
+		$('#idcheck').click(function(){
+			$('.idcheck').empty()
+			$.ajax({
+				url: "teacherIdCheck.jsp",
+				data:{
+					id : $('#id').val()	
+				},
+				success: function(check) {
+					$('.idcheck').append(check)
+				}
+			})
+		})
+	})
+	$(function() {
+		$('#join').click(function() {
+ 			id = $('#id').val()
+			pw = $('#pw').val()
+			pwcheck = $('#pwcheck').val()
+			name = $('#name').val()
+			birth = $('#birth').val()
+			gender = $('#gender').val()
+			tel = $('#tel').val()
+			accNum = $('#accNum').val()
+			bankName = $('#bankName').val()
+			accName = $('#accName').val()
+
+		if (id.length ==0) {
+			 $('.idcheck').html("<font color=red>아이디를 입력해주세요</font>")
+		} else {
+			if (id.length < 4 || id.length > 10) {
+				$('.idcheck').html("<font color=red>4자 이상, 10자 이하만 가능합니다</font>")
+			} else {
+				$('.idcheck').html("<font color=blue></font>")
+				if (pw.length ==0) {
+					$('.pwcheck1').html("<font color=red>비밀번호를 입력해주세요</font>")
+				} else {
+					if (pw.length < 6 || pw.length > 10) {
+						$('.pwcheck1').html("<font color=red>6~10자리의 비밀번호를 설정해주세요</font>")
+					} else {
+						$('.pwcheck1').html("<font color=blue></font>")
+						if (pwcheck.length==0){
+							$('.pwcheck2').html("<font color=red>비밀번호를 한번더 입력해주세요</font>")
+						} else {
+							if (pw != pwcheck) {
+							$('.pwcheck2').html("<font color=red>비밀번호가 다릅니다</font>")
+						} else {
+							if (pw.length != 0 && pw == pwcheck) {
+								$('.pwcheck2').html("<font color=blue>일치</font>")
+							if (name.length==0) {
+								$('.namecheck').html("<font color=red>이름을 입력해주세요</font>")
+							} else {
+								$('.namecheck').html("<font color=blue></font>")
+								if (birth.length==0) {
+									$('.birthcheck').html("<font color=red>생년월일을 입력해주세요</font>")
+								} else {
+									if (birth.length!=8) {
+										$('.birthcheck').html("<font color=red>8자리의 생년월일을 입력해주세요</font>")
+									} else {
+										$('.birthcheck').html("<font color=blue></font>")
+										if (gender.length==0) {
+											$('.gendercheck').html("<font color=red>성별을 입력해주세요</font>")
+										} else {
+											$('.gendercheck').html("<font color=blue></font>")
+											if (tel.length==0) {
+												$('.telcheck').html("<font color=red>전화번호를 입력해주세요</font>")
+											} else {
+												if (tel.length != 11) {
+													$('.telcheck').html("<font color=red>11자리의 숫자를 입력해주세요</font>")
+												} else {
+													$('.telcheck').html("<font color=blue></font>")
+												    if (accNum.length==0) {
+														$('.accNum').html("<font color=red>계좌번호를 입력해주세요</font>")
+													} else {
+														$('.accNum').html("<font color=blue></font>")
+														if (bankName.length==0){
+															$('.bankName').html("<font color=red>은행명을 입력해주세요</font>")
+														} else {
+															$('.bankName').html("<font color=blue></font>")
+															if (accName==0){
+																$('.accName').html("<font color=red>예금주를 입력해주세요</font>")
+															} else {
+																$('.accName').html("<font color=blue></font>")
+													 			$.ajax({
+																url: "teacherJoin.jsp",
+																data:{
+																	id : id,
+																	pw : pw,
+																	name : name,
+																	birth : birth,
+																	gender : gender,
+																	tel : tel,
+																	accNum : accNum,
+																	bankName : bankName,
+																	accName : accName
+																},
+																success: function(result) {
+																	alert("회원가입 성공!!")
+																	location.href = "teacherLogin.html"
+																	}
+																})
+															}
+														}
+													}
+												}		
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			} 
+		}
+	}
+		}
+		})
+	})
+</script>
+</head>
+<body>
+	<div class="teacherJoin_page">
+		<h3>강사회원가입</h3>
+		<div class="info2_title">
+			<br> 아이디 <br>
+		</div>
+		<input type="text" name="id" id="id" placeholder="4~10자리 사이의 아이디" class="form-control"><br> <br>
+		&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+		<button type="submit" id="idcheck" class="btn btn-primary">중복확인</button>
+		<div class="idcheck"></div>
+		<div class="info2_title">
+			<br> 비밀번호 <br>
+		</div> <input type="password" name="pw" id="pw"
+			placeholder="6~10자리 사이의 비밀번호" class="form-control">
+		<div class="pwcheck1"></div>
+		<div class="info2_title">
+			<br> 비밀번호확인 <br>
+		</div> <input type="password" name="pwcheck"
+			id="pwcheck" placeholder="입력한 비밀번호 확인" class="form-control">
+		<div class="pwcheck2"></div>
+		<div class="info2_title">
+			<br> 이름 <br>
+		</div> <input type="text" name="name" id="name"
+			placeholder="이름 입력" class="form-control">
+		<div class="namecheck"></div>
+		<div class="info2_title">
+			<br> 생년월일 <br>
+		</div> <input type="text" name="birth" id="birth"
+			placeholder="8자리 숫자(예)19900117)" class="form-control">
+		<div class="birthcheck"></div>
+		<div class="info2_title">
+			<br> 성별 <br>
+		</div> <input type="text" name="gender" id="gender"
+			placeholder="성별(예)남 or 여)" class="form-control">
+		<div class="gendercheck"></div>
+		<div class="info2_title">
+			<br> 전화번호 <br>
+		</div> <input type="text" name="tel" id="tel"
+			placeholder="11자리의 숫자 입력 '-' 제외" class="form-control"> 
+		<div class="telcheck"></div>
+		<div class="info2_title">
+			<br> 계좌번호 <br>
+		</div> <input type="text" name="accNum" id="accNum"
+			placeholder="계좌번호 입력 '-' 제외" class="form-control">
+		<div class="accNum"></div>
+		<div class="info2_title">
+			<br> 은행명 <br>
+		</div> <input type="text" name="bankName"
+			id="bankName" placeholder="은행명 입력" class="form-control">
+		<div class="bankName"></div>
+		<div class="info2_title">
+			<br> 예금주 <br>
+		</div> <input type="text" name="accName" id="accName"
+			placeholder="예금주 입력" class="form-control">
+		<div class="accName"></div>
+		<br> <br>
+		<a href="main.jsp"><button type="submit" class="btn btn-secondary">뒤로가기</button></a>
+		<button type="submit" id="join" class="btn btn-primary">가입하기</button>
+	</div>
+</body>
+</html>
